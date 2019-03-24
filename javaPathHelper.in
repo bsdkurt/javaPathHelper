@@ -1,0 +1,167 @@
+#!/bin/ksh
+
+# Copyright (c) 2006-2015 Kurt Miller <kurt@intricatesoftware.com>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# OpenBSD java startup script helper.
+
+# The intent here is to behave much the same as java on other
+# platforms. We respect the user's enviroment vars such as
+# JAVACMD (for packages that support its use), JAVA_HOME and
+# PATH. If JAVACMD and JAVA_HOME are not set then check the
+# PATH for a Sun style java command. If all fails, then get
+# the correct value from the package depends. In this way
+# the user doesn't ever need to set anything for applications
+# to work, but if they setup their environment, respect
+# it and don't attempt to save the user from trying to run
+# a 1.5 package with 1.3.
+
+USAGE="$0 -c|h PKGNAME"
+
+function usage {		# give usage message, and exit
+	echo "Usage: $USAGE" >&2
+	exit 1
+}
+
+function default_javacmd {
+	DEPENDS=$(cat %%PKG_DBDIR%%/$OPTARG*/+REQUIRING 2> /dev/null)
+	if echo $DEPENDS | grep -q kaffe ; then
+		JAVACMD=%%LOCALBASE%%/kaffe/bin/kaffe
+	elif echo $DEPENDS | grep -q jamvm ; then
+		JAVACMD=%%LOCALBASE%%/bin/jamvm
+	elif echo $DEPENDS | grep -q jdk-linux-1.3.1 ; then
+		JAVACMD=%%LOCALBASE%%/jdk1.3.1-linux/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.3.1 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.3.1/bin/java
+	elif echo $DEPENDS | grep -q jre-1.3.1 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.3.1/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.4.2 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.4.2/bin/java
+	elif echo $DEPENDS | grep -q jre-1.4.2 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.4.2/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.5.0 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.5.0/bin/java
+	elif echo $DEPENDS | grep -q jre-1.5.0 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.5.0/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.6.0 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.6.0/bin/java
+	elif echo $DEPENDS | grep -q jre-1.6.0 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.6.0/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.7.0 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.7.0/bin/java
+	elif echo $DEPENDS | grep -q jre-1.7.0 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.7.0/bin/java
+	elif echo $DEPENDS | grep -q jdk-1.8.0 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-1.8.0/bin/java
+	elif echo $DEPENDS | grep -q jre-1.8.0 ; then
+		JAVACMD=%%LOCALBASE%%/jre-1.8.0/bin/java
+	else
+		echo "Can not set JAVACMD. Package name not found: $OPTARG" >&2
+		exit 1
+	fi
+}
+
+function default_java_home {
+	DEPENDS=$(cat %%PKG_DBDIR%%/$OPTARG*/+REQUIRING 2> /dev/null)
+	if echo $DEPENDS | grep -q kaffe ; then
+		JAVA_HOME=%%LOCALBASE%%/kaffe
+	elif echo $DEPENDS | grep -q jdk-linux-1.3.1 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk1.3.1-linux
+	elif echo $DEPENDS | grep -q jdk-1.3.1 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.3.1
+	elif echo $DEPENDS | grep -q jre-1.3.1 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.3.1
+	elif echo $DEPENDS | grep -q jdk-1.4.2 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.4.2
+	elif echo $DEPENDS | grep -q jre-1.4.2 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.4.2
+	elif echo $DEPENDS | grep -q jdk-1.5.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.5.0
+	elif echo $DEPENDS | grep -q jre-1.5.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.5.0
+	elif echo $DEPENDS | grep -q jdk-1.6.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.6.0
+	elif echo $DEPENDS | grep -q jre-1.6.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.6.0
+	elif echo $DEPENDS | grep -q jdk-1.7.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.7.0
+	elif echo $DEPENDS | grep -q jre-1.7.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.7.0
+	elif echo $DEPENDS | grep -q jdk-1.8.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-1.8.0
+	elif echo $DEPENDS | grep -q jre-1.8.0 ; then
+		JAVA_HOME=%%LOCALBASE%%/jre-1.8.0
+	else
+		echo "Can not set JAVA_HOME. Package name not found: $OPTARG" >&2
+		exit 1
+	fi
+}
+
+function javacmd {
+	# Determine JAVACMD if not set
+	if [ -z "${JAVACMD}" ]; then
+		if [ -n "${JAVA_HOME}"  ]; then
+			# assume Sun style java executable location and command
+			JAVACMD="${JAVA_HOME}/bin/java"
+			if [ ! -x "${JAVACMD}" ]; then
+				echo "Error: JAVA_HOME is not defined correctly: ${JAVA_HOME}" >&2
+				echo "       Unable to find ${JAVACMD} or it is not executable" >&2
+				exit 1
+			fi
+		else
+			# assume Sun style java command and check path
+			JAVACMD=$(which java > /dev/null 2>&1 && which java)
+			if [ -z "$JAVACMD" ] ; then
+				default_javacmd
+			fi
+		fi
+	fi
+
+	if [ ! -x "$JAVACMD" ]; then
+		echo "Error: JAVACMD is not defined correctly: ${JAVACMD}" >&2
+		echo "       Unable to find ${JAVACMD} or it is not executable" >&2
+		exit 1
+	else
+		echo $JAVACMD
+	fi
+}
+
+function javahome {		# echo javahome
+	# Determine JAVA_HOME if not set
+	if [ -z "${JAVA_HOME}"  ]; then
+		# assume Sun style java command and check path
+		JAVAPATH=$(dirname $(which java > /dev/null 2>&1 && which java) 2> /dev/null)
+		if [ -z "${JAVAPATH}" ] ; then
+			default_java_home
+		else
+			# assume Sun jdk dir setup where java sits under bin dir
+			JAVA_HOME=$(dirname ${JAVAPATH})
+		fi
+	fi
+
+	if [ ! -x "${JAVA_HOME}/bin/java" ]; then
+		echo "Error: JAVA_HOME is not defined correctly: ${JAVA_HOME}" >&2
+		echo "       Unable to find ${JAVA_HOME}/bin/java or it is not executable" >&2
+		exit 1
+	else
+		echo ${JAVA_HOME}
+	fi
+}
+
+getopts "c:h:" opt
+case "$opt" in 
+	c)	javacmd;;
+	h)	javahome;;
+	*)	usage;;
+esac
