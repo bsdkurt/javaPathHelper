@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-# Copyright (c) 2006-2018 Kurt Miller <kurt@openbsd.com>
+# Copyright (c) 2006-2021 Kurt Miller <kurt@openbsd.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,7 +20,7 @@
 # platforms. We respect the user's enviroment vars such as
 # JAVACMD (for packages that support its use), JAVA_HOME and
 # PATH. If JAVACMD and JAVA_HOME are not set then check the
-# PATH for a java command. If all fails, then get  the correct
+# PATH for a java command. If all fails, then get the correct
 # value from the package depends. In this way the user doesn't
 # need to set anything for applications to work, but if they
 # setup their environment, respect it and don't attempt to save
@@ -39,6 +39,8 @@ function default_javacmd {
 		JAVACMD=%%LOCALBASE%%/jdk-1.8.0/bin/java
 	elif echo $DEPENDS | grep -q jdk-11 ; then
 		JAVACMD=%%LOCALBASE%%/jdk-11/bin/java
+	elif echo $DEPENDS | grep -q jdk-16 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-16/bin/java
 	else
 		echo "Can not set JAVACMD. Package name not found: $OPTARG" >&2
 		exit 1
@@ -51,6 +53,8 @@ function default_java_home {
 		JAVA_HOME=%%LOCALBASE%%/jdk-1.8.0
 	elif echo $DEPENDS | grep -q jdk-11 ; then
 		JAVA_HOME=%%LOCALBASE%%/jdk-11
+	elif echo $DEPENDS | grep -q jdk-16 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-16
 	else
 		echo "Can not set JAVA_HOME. Package name not found: $OPTARG" >&2
 		exit 1
@@ -60,7 +64,7 @@ function default_java_home {
 function javacmd {
 	# Determine JAVACMD if not set
 	if [ -z "${JAVACMD}" ]; then
-		if [ -n "${JAVA_HOME}"  ]; then
+		if [ -n "${JAVA_HOME}" ]; then
 			# assume Sun style java executable location and command
 			JAVACMD="${JAVA_HOME}/bin/java"
 			if [ ! -x "${JAVACMD}" ]; then
@@ -88,7 +92,7 @@ function javacmd {
 
 function javahome {		# echo javahome
 	# Determine JAVA_HOME if not set
-	if [ -z "${JAVA_HOME}"  ]; then
+	if [ -z "${JAVA_HOME}" ]; then
 		# assume Sun style java command and check path
 		JAVAPATH=$(dirname $(which java > /dev/null 2>&1 && which java) 2> /dev/null)
 		if [ -z "${JAVAPATH}" ] ; then
