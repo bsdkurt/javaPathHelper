@@ -41,6 +41,8 @@ function default_javacmd {
 		JAVACMD=%%LOCALBASE%%/jdk-11/bin/java
 	elif echo $DEPENDS | grep -q jdk-16 ; then
 		JAVACMD=%%LOCALBASE%%/jdk-16/bin/java
+	elif echo $DEPENDS | grep -q jdk-17 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-17/bin/java
 	else
 		echo "Can not set JAVACMD. Package name not found: $OPTARG" >&2
 		exit 1
@@ -55,6 +57,8 @@ function default_java_home {
 		JAVA_HOME=%%LOCALBASE%%/jdk-11
 	elif echo $DEPENDS | grep -q jdk-16 ; then
 		JAVA_HOME=%%LOCALBASE%%/jdk-16
+	elif echo $DEPENDS | grep -q jdk-17 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-17
 	else
 		echo "Can not set JAVA_HOME. Package name not found: $OPTARG" >&2
 		exit 1
