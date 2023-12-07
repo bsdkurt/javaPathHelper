@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-# Copyright (c) 2006-2021 Kurt Miller <kurt@openbsd.com>
+# Copyright (c) 2006-2023 Kurt Miller <kurt@openbsd.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -39,10 +39,10 @@ function default_javacmd {
 		JAVACMD=%%LOCALBASE%%/jdk-1.8.0/bin/java
 	elif echo $DEPENDS | grep -q jdk-11 ; then
 		JAVACMD=%%LOCALBASE%%/jdk-11/bin/java
-	elif echo $DEPENDS | grep -q jdk-16 ; then
-		JAVACMD=%%LOCALBASE%%/jdk-16/bin/java
 	elif echo $DEPENDS | grep -q jdk-17 ; then
 		JAVACMD=%%LOCALBASE%%/jdk-17/bin/java
+	elif echo $DEPENDS | grep -q jdk-21 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-21/bin/java
 	else
 		echo "Can not set JAVACMD. Package name not found: $OPTARG" >&2
 		exit 1
@@ -55,10 +55,10 @@ function default_java_home {
 		JAVA_HOME=%%LOCALBASE%%/jdk-1.8.0
 	elif echo $DEPENDS | grep -q jdk-11 ; then
 		JAVA_HOME=%%LOCALBASE%%/jdk-11
-	elif echo $DEPENDS | grep -q jdk-16 ; then
-		JAVA_HOME=%%LOCALBASE%%/jdk-16
 	elif echo $DEPENDS | grep -q jdk-17 ; then
 		JAVA_HOME=%%LOCALBASE%%/jdk-17
+	elif echo $DEPENDS | grep -q jdk-21 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-21
 	else
 		echo "Can not set JAVA_HOME. Package name not found: $OPTARG" >&2
 		exit 1
@@ -94,7 +94,7 @@ function javacmd {
 	fi
 }
 
-function javahome {		# echo javahome
+function javahome {
 	# Determine JAVA_HOME if not set
 	if [ -z "${JAVA_HOME}" ]; then
 		# assume Sun style java command and check path
