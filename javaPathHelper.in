@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-# Copyright (c) 2006-2023 Kurt Miller <kurt@openbsd.com>
+# Copyright (c) 2006-2025 Kurt Miller <kurt@openbsd.com>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -43,6 +43,8 @@ function default_javacmd {
 		JAVACMD=%%LOCALBASE%%/jdk-17/bin/java
 	elif echo $DEPENDS | grep -q jdk-21 ; then
 		JAVACMD=%%LOCALBASE%%/jdk-21/bin/java
+	elif echo $DEPENDS | grep -q jdk-25 ; then
+		JAVACMD=%%LOCALBASE%%/jdk-25/bin/java
 	else
 		echo "Can not set JAVACMD. Package name not found: $OPTARG" >&2
 		exit 1
@@ -59,6 +61,8 @@ function default_java_home {
 		JAVA_HOME=%%LOCALBASE%%/jdk-17
 	elif echo $DEPENDS | grep -q jdk-21 ; then
 		JAVA_HOME=%%LOCALBASE%%/jdk-21
+	elif echo $DEPENDS | grep -q jdk-25 ; then
+		JAVA_HOME=%%LOCALBASE%%/jdk-25
 	else
 		echo "Can not set JAVA_HOME. Package name not found: $OPTARG" >&2
 		exit 1
